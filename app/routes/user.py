@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.schemas.user import UserCreate, UserUpdate, UserResponse
 from app.database import SessionLocal
-from app.services.user_service import (
+from app.services.userService import (
     create_user,
     update_user,
     delete_user,
@@ -19,15 +19,18 @@ def get_db():
     finally:
         db.close()
 
-@router.post("/users/", response_model=UserResponse)
+@router.post("/signup/", response_model=UserResponse)
 def create_new_user(user: UserCreate, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.email == user.email).first()
+    if db_user:
+            raise HTTPException(status_code=400, detail="Email already registered")
     return create_user(db=db, user=user)
 
-@router.put("/users/{user_id}", response_model=UserResponse)
+@router.put("/update-user/{user_id}", response_model=UserResponse)
 def update_existing_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):
     return update_user(db=db, user_id=user_id, user=user)
 
-@router.delete("/users/{user_id}")
+@router.delete("/delete-user/{user_id}")
 def delete_existing_user(user_id: int, db: Session = Depends(get_db)):
     delete_user(db=db, user_id=user_id)
     return {"message": "User deleted successfully"}

@@ -1,9 +1,38 @@
+import logging
 from sqlalchemy.orm import Session
-from app.models.user import User
+from fastapi import HTTPException
+from app.models import User
 from app.schemas.user import UserCreate, UserUpdate
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
+
+
+logger = logging.getLogger(__name__)
+
+def get_sha256_hash(password: str) -> str:
+    # Create a SHA-256 hash object
+    digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
+    # Update the hash object with the salt and password bytes
+    digest.update(password.encode('utf-8'))
+    # Finalize the hash and return the hexadecimal representation
+    return digest.finalize().hex()
+
+hashed_password = get_sha256_hash("Venu71198")
+logger.info(hashed_password)
+
+
 
 def create_user(db: Session, user: UserCreate):
-    db_user = User(**user.dict())
+    db_user = db.query(User).filter_by(email == user.email).first()
+    if db_user:
+            raise HTTPException(status_code=400, detail="Email already registered")
+    hashed_password = get_sha256_hash(user.password)
+    db_user = User(
+        name=user.name,
+        mobile_no=user.mobile_no,
+        email=user.email,
+        hashed_password=hashed_password
+    )
     db.add(db_user)
     db.commit()
     db.refresh(db_user)

@@ -3,9 +3,12 @@ from app.models.discussion import Discussion
 from app.schemas.discussion import DiscussionCreate, DiscussionUpdate
 from fastapi import HTTPException
 from elasticsearch import Elasticsearch
+import logging
 
+logger = logging.getLogger(__name__)
 def create_discussion(db: Session, discussion: DiscussionCreate):
     db_discussion = Discussion(**discussion.dict())
+    logger.info(db_discussion)
     db.add(db_discussion)
     db.commit()
     db.refresh(db_discussion)
@@ -33,23 +36,25 @@ def get_discussions_by_tags(db: Session, tags: str):
 
 def get_discussions_by_text(db: Session, text: str):
     return db.query(Discussion).filter(Discussion.text.ilike(f"%{text}%")).all()
+def get_all_discussions(db: Session):
+    return db.query(Discussion).all()
 
-es = Elasticsearch()
+# es = Elasticsearch()
 
-def index_discussion(discussion):
-    es.index(index="discussions", id=discussion.id, body={
-        "text": discussion.text,
-        "hashtags": discussion.hashtags,
-        "created_on": discussion.created_on,
-        "user_id": discussion.user_id
-    })
+# def index_discussion(discussion):
+#     es.index(index="discussions", id=discussion.id, body={
+#         "text": discussion.text,
+#         "hashtags": discussion.hashtags,
+#         "created_on": discussion.created_on,
+#         "user_id": discussion.user_id
+#     })
 
-def search_discussions_by_hashtags(tags: str):
-    response = es.search(index="discussions", body={
-        "query": {
-            "match": {
-                "hashtags": tags
-            }
-        }
-    })
-    return response['hits']['hits']
+# def search_discussions_by_hashtags(tags: str):
+#     response = es.search(index="discussions", body={
+#         "query": {
+#             "match": {
+#                 "hashtags": tags
+#             }
+#         }
+#     })
+#     return response['hits']['hits']

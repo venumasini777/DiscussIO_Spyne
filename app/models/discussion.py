@@ -6,11 +6,12 @@ from datetime import datetime
 class Discussion(Base):
     __tablename__ = 'discussions'
 
-    id = Column(Integer, primary_key=True, index=True)
-    text = Column(String)
-    image_url = Column(String, nullable=True)
+    id = Column(Integer, primary_key=True, index=True,autoincrement = True)
+    content = Column(String)
     created_on = Column(DateTime, default=datetime.utcnow)
-    user_id = Column(Integer, ForeignKey('users.id'))
+    updated_on = Column(DateTime, nullable = True)
+    image = Column(String, nullable=True)
     hashtags = Column(String)
+    user_id = Column(Integer, ForeignKey('users.id'))
 
     user = relationship("User", back_populates="discussions")

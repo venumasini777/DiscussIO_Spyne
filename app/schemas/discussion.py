@@ -1,20 +1,29 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy.orm import relationship, declarative_base
+from datetime import datetime
 
-class UserCreate(BaseModel):
-    name: str
-    mobile_no: str
-    email: EmailStr
 
-class UserUpdate(BaseModel):
-    name: str
-    mobile_no: str
-    email: EmailStr
 
-class UserResponse(BaseModel):
+
+class DiscussionCreate(BaseModel):
+    content: str
+    image: str
+    hashtags: str
+    user_id: int
+
+class DiscussionUpdate(BaseModel):
+    text: str
+    image_url: str = None
+    hashtags: str
+
+class DiscussionResponse(BaseModel):
     id: int
-    name: str
-    mobile_no: str
-    email: EmailStr
+    content: str
+    created_on: datetime
+    image: str
+    #hashtags: str
+    user_id: int
 
     class Config:
         orm_mode = True

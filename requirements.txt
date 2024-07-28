@@ -3,3 +3,4 @@ uvicorn
 sqlalchemy
 elasticsearch
 pymysql
+cryptography
